@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Girasoles animados</title>
+<style>
+  :root{
+    --bg:#24143a; /* fondo morado/espacial */
+    --petal:#f2c200; /* amarillo pétalo */
+    --center:#5b3b1f; /* marrón centro */
+    --stem:#2b8a3e; /* verde tallo */
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: radial-gradient(circle at 20% 10%, rgba(255,255,255,0.03), transparent 10%),
+                radial-gradient(circle at 80% 90%, rgba(255,255,255,0.02), transparent 10%),
+                var(--bg);
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* fondo con la imagen subida (opcional) */
+  .page-bg{
+    position:fixed;
+    inset:0;
+    background-image: url('/mnt/data/2EB0CF53-B706-4B13-AE29-4D9710473018.jpeg');
+    background-size:cover;
+    background-position:center top;
+    opacity:0.06; /* muy tenue para no quitar protagonismo a las flores */
+    pointer-events:none;
+    z-index:0;
+    mix-blend-mode:screen;
+  }
+
+  .garden{
+    position:relative;
+    z-index:1;
+    display:flex;
+    gap:28px;
+    align-items:flex-end;
+    padding:40px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+  }
+
+  /* contenedor de cada girasol */
+  .sunflower{
+    width:160px;
+    height:260px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    transform-origin:center bottom;
+    animation: floatY 6s ease-in-out infinite;
+  }
+
+  /* anima la oscilación del tallo/entero */
+  .sunflower.sway{
+    animation: floatY 6s ease-in-out infinite, sway 3.6s ease-in-out infinite;
+  }
+
+  /* suavemente sube y baja todo */
+  @keyframes floatY{
+    0%{ transform: translateY(0); }
+    50%{ transform: translateY(-8px); }
+    100%{ transform: translateY(0); }
+  }
+
+  /* mece la flor */
+  @keyframes sway{
+    0%{ transform: rotate(-3deg) translateY(0); }
+    50%{ transform: rotate(4deg) translateY(-4px); }
+    100%{ transform: rotate(-3deg) translateY(0); }
+  }
+
+  /* SVG ocupa la parte superior */
+  .sunSVG{
+    width:160px;
+    height:180px;
+    display:block;
+  }
+
+  /* tallo y hojas SVG se animan con keyframes para flexión */
+  .stem{
+    transform-origin: 50% 0%;
+    animation: stemFlex 3.6s ease-in-out infinite;
+  }
+
+  @keyframes stemFlex{
+    0%{ transform: rotate(0deg); }
+    50%{ transform: rotate(-2deg); }
+    100%{ transform: rotate(0deg); }
+  }
+
+  /* pétalos: pequeño 'breathe' para parecer que se mueven */
+  .petals g{
+    transform-origin: 50% 50%;
+    animation: petalB 4.5s ease-in-out infinite;
+  }
+
+  @keyframes petalB{
+    0%{ transform: scale(1); }
+    50%{ transform: scale(1.02) translateY(-1px); }
+    100%{ transform: scale(1); }
+  }
+
+  /* centro de la flor con un ligero pulso */
+  .center{
+    transform-origin: center;
+    animation: centerPulse 5.2s ease-in-out infinite;
+  }
+
+  @keyframes centerPulse{
+    0%{ transform: scale(1); }
+    50%{ transform: scale(1.03); }
+    100%{ transform: scale(1); }
+  }
+
+  /* hojas: simular movimiento distinto */
+  .leaf{
+    transform-origin: 50% 50%;
+    animation: leafWiggle 4s ease-in-out infinite;
+  }
+  @keyframes leafWiggle{
+    0%{ transform: rotate(0deg); }
+    50%{ transform: rotate(6deg) translateY(-2px); }
+    100%{ transform: rotate(0deg); }
+  }
+
+  /* destellos / chispitas */
+  .sparkle{
+    position:absolute;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,0.9) 15%, rgba(255,255,255,0.3) 60%, transparent 70%);
+    pointer-events:none;
+    filter: blur(0.6px);
+    opacity:0.9;
+    animation: sparkleFloat 4s infinite;
+  }
+  @keyframes sparkleFloat{
+    0%{ transform: translateY(0) scale(0.8); opacity:0.9; }
+    50%{ transform: translateY(-24px) scale(1.2); opacity:0.5; }
+    100%{ transform: translateY(0) scale(0.8); opacity:0.9; }
+  }
+
+  /* texto pequeño debajo */
+  .label{
+    color:#f7f0ff;
+    font-size:14px;
+    text-align:center;
+    margin-top:8px;
+    opacity:0.9;
+  }
+
+  /* responsive */
+  @media (max-width:420px){
+    .garden{ gap:14px; padding:16px; }
+    .sunflower{ width:110px; height:190px; }
+    .sunSVG{ width:110px; height:130px; }
+  }
+</style>
+</head>
+<body>
+  <div class="page-bg" aria-hidden="true"></div>
+
+  <div class="garden" id="garden">
+    <!-- Tres girasoles de ejemplo -->
+    <div class="sunflower sway" data-offset="0">
+      <!-- SVG de girasol: pétalos, centro, tallo y hojas -->
+      <svg class="sunSVG" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Girasol">
+        <!-- tallo y hojas -->
+        <g transform="translate(100,120)" class="stem">
+          <path d="M0 0 C-4 40 -8 140 -2 200" stroke="var(--stem)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g transform="translate(-12,50) rotate(-18)" class="leaf">
+            <ellipse cx="0" cy="0" rx="24" ry="12" fill="#2f9447"/>
+            <path d="M-10 0 Q 0 -3 10 0" stroke="#2b8a3e" stroke-width="1.5" fill="none" opacity="0.35"/>
+          </g>
+          <g transform="translate(18,90) rotate(25)" class="leaf">
+            <ellipse cx="0" cy="0" rx="18" ry="10" fill="#2f9447"/>
+            <path d="M-8 0 Q 0 -2 8 0" stroke="#2b8a3e" stroke-width="1.5" fill="none" opacity="0.35"/>
+          </g>
+        </g>
+
+        <!-- pétalos -->
+        <g class="petals" transform="translate(100,64)">
+          <!-- 8 pétalos repetidos con rotación -->
+          <g style="transform-origin:50% 50%;">
+            <!-- Se usan bucles visuales con duplicados: -->
+            <ellipse class="pet" cx="0" cy="-46" rx="12" ry="36" fill="var(--petal)"/>
+          </g>
+
+          <!-- clonamos pétalos usando <use> con transform -->
+          <g id="petalon">
+            <ellipse cx="0" cy="-46" rx="12" ry="36" fill="var(--petal)"/>
+          </g>
+
+          <!-- Dibujamos 8 pétalos rotados -->
+          <g>
+            <use href="#petalon" transform="rotate(0)"/>
+            <use href="#petalon" transform="rotate(45)"/>
+            <use href="#petalon" transform="rotate(90)"/>
+            <use href="#petalon" transform="rotate(135)"/>
+            <use href="#petalon" transform="rotate(180)"/>
+            <use href="#petalon" transform="rotate(225)"/>
+            <use href="#petalon" transform="rotate(270)"/>
+            <use href="#petalon" transform="rotate(315)"/>
+          </g>
+        </g>
+
+        <!-- centro -->
+        <g class="center" transform="translate(100,64)">
+          <circle cx="0" cy="0" r="22" fill="var(--center)"/>
+          <!-- puntos texturizados -->
+          <g opacity="0.12">
+            <circle cx="-6" cy="-2" r="3" fill="#000000"/>
+            <circle cx="5" cy="4" r="2.6" fill="#000000"/>
+            <circle cx="0" cy="8" r="2.2" fill="#000000"/>
+            <circle cx="-10" cy="6" r="1.8" fill="#000000"/>
+          </g>
+        </g>
+      </svg>
+
+      <div class="label">Girasol</div>
+    </div>
+
+    <!-- copia y pega para más girasoles o genera con JS -->
+    <div class="sunflower sway" data-offset="1">
+      <svg class="sunSVG" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Girasol">
+        <g transform="translate(100,120)" class="stem">
+          <path d="M0 0 C-6 45 -10 140 -3 200" stroke="var(--stem)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g transform="translate(-12,50) rotate(-6)" class="leaf">
+            <ellipse cx="0" cy="0" rx="20" ry="10" fill="#2f9447"/>
+          </g>
+          <g transform="translate(18,80) rotate(12)" class="leaf">
+            <ellipse cx="0" cy="0" rx="16" ry="9" fill="#2f9447"/>
+          </g>
+        </g>
+        <g class="petals" transform="translate(100,64)">
+          <g id="pet2">
+            <ellipse cx="0" cy="-46" rx="13" ry="36" fill="var(--petal)"/>
+          </g>
+          <g>
+            <use href="#pet2" transform="rotate(0)"/>
+            <use href="#pet2" transform="rotate(40)"/>
+            <use href="#pet2" transform="rotate(80)"/>
+            <use href="#pet2" transform="rotate(120)"/>
+            <use href="#pet2" transform="rotate(160)"/>
+            <use href="#pet2" transform="rotate(200)"/>
+            <use href="#pet2" transform="rotate(240)"/>
+            <use href="#pet2" transform="rotate(280)"/>
+            <use href="#pet2" transform="rotate(320)"/>
+          </g>
+        </g>
+        <g class="center" transform="translate(100,64)">
+          <circle cx="0" cy="0" r="20" fill="var(--center)"/>
+        </g>
+      </svg>
+      <div class="label">Girasol</div>
+    </div>
+
+    <div class="sunflower sway" data-offset="2">
+      <svg class="sunSVG" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Girasol">
+        <g transform="translate(100,120)" class="stem">
+          <path d="M0 0 C2 35 -6 140 4 200" stroke="var(--stem)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g transform="translate(-10,60) rotate(-12)" class="leaf">
+            <ellipse cx="0" cy="0" rx="22" ry="11" fill="#2f9447"/>
+          </g>
+        </g>
+        <g class="petals" transform="translate(100,64)">
+          <g id="pet3">
+            <ellipse cx="0" cy="-46" rx="11" ry="34" fill="var(--petal)"/>
+          </g>
+          <g>
+            <use href="#pet3" transform="rotate(0)"/>
+            <use href="#pet3" transform="rotate(36)"/>
+            <use href="#pet3" transform="rotate(72)"/>
+            <use href="#pet3" transform="rotate(108)"/>
+            <use href="#pet3" transform="rotate(144)"/>
+            <use href="#pet3" transform="rotate(180)"/>
+            <use href="#pet3" transform="rotate(216)"/>
+            <use href="#pet3" transform="rotate(252)"/>
+            <use href="#pet3" transform="rotate(288)"/>
+            <use href="#pet3" transform="rotate(324)"/>
+          </g>
+        </g>
+        <g class="center" transform="translate(100,64)">
+          <circle cx="0" cy="0" r="18" fill="var(--center)"/>
+        </g>
+      </svg>
+      <div class="label">Girasol</div>
+    </div>
+  </div>
+
+  <!-- contenedor para chispitas dinámicas -->
+  <div id="sparkles"></div>
+
+<script>
+  // Genera chispitas aleatorias alrededor de las flores
+  const sparklesContainer = document.getElementById('sparkles');
+  const garden = document.getElementById('garden');
+
+  function createSparkle(x, y, delay=0){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = x + 'px';
+    s.style.top = y + 'px';
+    s.style.opacity = (0.6 + Math.random()*0.5).toFixed(2);
+    s.style.transform = `scale(${0.6 + Math.random()*0.9})`;
+    s.style.animationDelay = `${delay}s`;
+    garden.appendChild(s);
+    // elimina después de un tiempo para no acumular
+    setTimeout(()=> s.remove(), 8000 + Math.random()*3000);
+  }
+
+  // crear chispitas alrededor de cada flor periódicamente
+  function scatterSparkles(){
+    const flowers = document.querySelectorAll('.sunflower');
+    flowers.forEach((f,idx)=>{
+      const rect = f.getBoundingClientRect();
+      // crea entre 1 y 3 chispas por flor
+      const n = 1 + Math.floor(Math.random()*3);
+      for(let i=0;i<n;i++){
+        const x = (rect.left + rect.right)/2 + (Math.random()*120 - 60);
+        const y = rect.top + (Math.random()*60 - 20);
+        createSparkle(x, y, Math.random()*1.2);
+      }
+    });
+  }
+
+  setInterval(scatterSparkles, 1200);
+
+  // Añade variación aleatoria a la animación de cada girasol para que no se muevan exactamente igual
+  document.querySelectorAll('.sunflower').forEach((el, i)=>{
+    const delay = (Math.random()*2).toFixed(2);
+    el.style.animationDelay = delay + 's';
+    const svgStem = el.querySelector('.stem');
+    if(svgStem){
+      svgStem.style.animationDelay = (Math.random()*1.5)+'s';
+      // variar la velocidad
+      svgStem.style.animationDuration = (3 + Math.random()*1.6)+'s';
+    }
+    const petals = el.querySelector('.petals g');
+    if(petals){
+      petals.style.animationDelay = (Math.random()*2)+'s';
+      petals.style.animationDuration = (3.5 + Math.random()*2.5)+'s';
+    }
+    const center = el.querySelector('.center');
+    if(center){
+      center.style.animationDelay = (Math.random()*2)+'s';
+    }
+  });
+
+  // Si quieres añadir más girasoles por JS puedes usar esta función:
+  function addSunflower(){
+    const template = document.querySelector('.sunflower').cloneNode(true);
+    template.style.opacity = 0;
+    garden.appendChild(template);
+    setTimeout(()=> template.style.opacity = 1, 50);
+    // re-aplica variaciones
+    template.querySelectorAll('*').forEach(n => {
+      // limpia posibles ids duplicadas (no crítico aquí)
+      n.id = n.id ? n.id + '-copy' + Math.floor(Math.random()*1000) : n.id;
+    });
+  }
+
+  // ejemplo: añade uno más después de 3 segundos
+  setTimeout(()=> addSunflower(), 3000);
+</script>
+</body>
+</html>
